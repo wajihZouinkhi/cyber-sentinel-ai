@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 160 100% 50%;
+    --primary-foreground: 222 47% 5%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 32% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 189 100% 50%;
+    --accent-foreground: 222 47% 5%;
+    --destructive: 346 87% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 160 100% 50%;
+    --radius: 0.75rem;
+  }
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(0,255,159,0.06), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(0,229,255,0.06), transparent 40%),
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: auto, auto, 32px 32px, 32px 32px;
+  }
+}
+
+.glass { @apply bg-card/60 backdrop-blur-xl border border-border/60; }
+.glow-primary { box-shadow: 0 0 24px -4px hsl(var(--primary) / 0.4); }
+.glow-accent { box-shadow: 0 0 24px -4px hsl(var(--accent) / 0.4); }
+
+.scanline { position: relative; overflow: hidden; }
+.scanline::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent, hsl(var(--primary)/0.08), transparent);
+  animation: scan 4s linear infinite; pointer-events: none;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
