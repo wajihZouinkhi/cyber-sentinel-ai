@@ -1,0 +1,3 @@
+2026-04-20T10:12:01Z sshd[1234]: Failed password for root from 203.0.113.42 port 54321 ssh2
+2026-04-20T10:12:05Z sshd[1235]: Failed password for root from 203.0.113.42 port 54322 ssh2
+2026-04-20T10:14:22Z powershell.exe: -enc JABjACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQA...

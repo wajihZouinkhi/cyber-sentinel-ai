@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: csai_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ./chroma_db:/app/chroma_db
+    depends_on:
+      - chromadb
+
+  frontend:
+    build: ./frontend
+    container_name: csai_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: csai_chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./chroma_db:/chroma/chroma

@@ -1,0 +1,5 @@
+[
+  {"id": "ALERT-0001", "source": "firewall", "severity": "high", "description": "Multiple failed SSH logins from 203.0.113.42"},
+  {"id": "ALERT-0002", "source": "edr", "severity": "critical", "description": "PowerShell encoded command execution detected on host WIN-DC01"},
+  {"id": "ALERT-0003", "source": "ids", "severity": "medium", "description": "Suspicious DNS query to known DGA domain"}
+]
