@@ -1,37 +1,45 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowDownRight, ArrowUpRight, Minus, LucideIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export function StatCard({ label, value, delta, icon: Icon, tone = "primary" }: {
-  label: string; value: string | number; delta?: number; icon: LucideIcon;
-  tone?: "primary" | "accent" | "destructive" | "warning";
-}) {
-  const toneMap: Record<string, string> = {
-    primary: "from-primary/10 to-primary/0 text-primary",
-    accent: "from-accent/10 to-accent/0 text-accent",
-    destructive: "from-destructive/10 to-destructive/0 text-destructive",
-    warning: "from-cyber-amber/10 to-cyber-amber/0 text-cyber-amber"
-  };
+type Props = {
+  label: string
+  value: string | number
+  delta?: number
+  unit?: string
+  icon?: LucideIcon
+  accent?: "primary" | "accent" | "destructive"
+}
+
+export function StatCard({ label, value, delta = 0, unit, icon: Icon, accent = "primary" }: Props) {
+  const trendUp = delta > 0, trendDown = delta < 0
+  const accentCls = accent === "accent" ? "text-accent" : accent === "destructive" ? "text-destructive" : "text-primary"
   return (
-    <Card className="relative overflow-hidden group hover:border-primary/40 transition-all">
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60", toneMap[tone])} />
-      <CardContent className="relative p-6">
+    <Card className="glass gradient-border relative overflow-hidden group transition-all hover:-translate-y-0.5 hover:glow-primary">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <CardContent className="relative p-5">
         <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
-            <p className="text-3xl font-bold mt-2 tabular-nums">{value}</p>
-            {delta !== undefined && (
-              <div className={cn("flex items-center gap-1 mt-2 text-xs font-medium", delta >= 0 ? "text-cyber-green" : "text-cyber-red")}>
-                {delta >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {Math.abs(delta)}% vs last 24h
-              </div>
-            )}
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+            <p className="text-3xl font-semibold tracking-tight">{value}</p>
           </div>
-          <div className={cn("p-2.5 rounded-lg bg-background/40 backdrop-blur border border-border/60", toneMap[tone].split(" ").pop())}>
-            <Icon className="h-5 w-5" />
-          </div>
+          {Icon && (
+            <div className={cn("rounded-xl p-2.5 bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20", accentCls)}>
+              <Icon className="h-5 w-5" />
+            </div>
+          )}
+        </div>
+        <div className="mt-4 flex items-center gap-2 text-xs">
+          <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium",
+            trendUp && "bg-emerald-500/10 text-emerald-400",
+            trendDown && "bg-rose-500/10 text-rose-400",
+            !trendUp && !trendDown && "bg-muted text-muted-foreground")}>
+            {trendUp ? <ArrowUpRight className="h-3 w-3" /> : trendDown ? <ArrowDownRight className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+            {delta > 0 ? "+" : ""}{delta}%
+          </span>
+          {unit && <span className="text-muted-foreground">{unit}</span>}
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

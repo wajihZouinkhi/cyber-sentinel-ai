@@ -1,54 +1,63 @@
-"use client";
-import Link from "next/link";
-import { Shield, Activity, Database, FileText, Radar, Settings, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+"use client"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Activity, BookOpen, Bot, FileText, LayoutDashboard, Shield, Target } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const nav = [
-  { href: "/", label: "Overview", icon: Radar },
-  { href: "/threats", label: "Threat Feed", icon: Activity },
-  { href: "/agents", label: "Agent Stream", icon: Zap },
-  { href: "/mitre", label: "MITRE ATT&CK", icon: Shield },
-  { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/knowledge", label: "Knowledge Base", icon: Database },
-];
+  { href: "/",          label: "Overview",      icon: LayoutDashboard },
+  { href: "/threats",   label: "Threat Feed",   icon: Activity },
+  { href: "/agents",    label: "Agent Stream",  icon: Bot },
+  { href: "/mitre",     label: "MITRE ATT&CK",  icon: Target },
+  { href: "/reports",   label: "Reports",       icon: FileText },
+  { href: "/knowledge", label: "Knowledge",     icon: BookOpen },
+]
 
 export function AppSidebar() {
-  const path = usePathname();
+  const pathname = usePathname()
   return (
-    <aside className="w-64 shrink-0 border-r border-border/60 glass h-screen sticky top-0 flex flex-col">
-      <div className="p-6 border-b border-border/60">
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <Shield className="h-7 w-7 text-primary animate-pulse-glow" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold tracking-tight">Cyber Sentinel</h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">AI · v1.0</p>
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border/50 bg-background/60 backdrop-blur-xl md:flex md:flex-col">
+      <div className="flex h-16 items-center gap-2.5 border-b border-border/50 px-6">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent blur-md opacity-60" />
+          <div className="relative rounded-lg bg-gradient-to-br from-primary to-accent p-1.5">
+            <Shield className="h-4 w-4 text-primary-foreground" />
           </div>
         </div>
+        <div>
+          <p className="text-sm font-semibold leading-none">Cyber Sentinel</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">AI SOC</p>
+        </div>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {nav.map(({ href, label, icon: Icon }) => {
-          const active = path === href;
+      <nav className="flex-1 space-y-1 p-3">
+        {nav.map((item) => {
+          const active = pathname === item.href
           return (
-            <Link key={href} href={href} className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
-              active ? "bg-primary/10 text-primary glow-primary" : "text-muted-foreground hover:bg-accent/5 hover:text-foreground"
-            )}>
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
+            <Link key={item.href} href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                active
+                  ? "bg-gradient-to-r from-primary/15 to-accent/10 text-foreground border border-primary/20"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}>
+              <item.icon className={cn("h-4 w-4 transition-colors", active && "text-primary")} />
+              {item.label}
+              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary animate-pulse-glow" />}
             </Link>
-          );
+          )
         })}
       </nav>
-      <div className="p-4 border-t border-border/60">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="h-2 w-2 rounded-full bg-cyber-green animate-pulse" />
-          All systems operational
+      <div className="border-t border-border/50 p-4">
+        <div className="glass rounded-xl p-3">
+          <p className="text-xs font-medium">System Health</p>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+              <div className="h-full w-[92%] bg-gradient-to-r from-primary to-accent animate-shimmer bg-[linear-gradient(90deg,hsl(160_100%_50%),hsl(189_100%_50%),hsl(160_100%_50%))]" />
+            </div>
+            <span className="text-[10px] font-semibold text-primary">92%</span>
+          </div>
         </div>
       </div>
     </aside>
-  );
+  )
 }
