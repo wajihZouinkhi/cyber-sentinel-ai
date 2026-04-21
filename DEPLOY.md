@@ -1,18 +1,46 @@
-# Cyber Sentinel AI — Deployment Guide
+# Deploying Cyber Sentinel AI
 
-## Verified local run
-Backend: cd backend && uvicorn main:app --host 0.0.0.0 --port 8000  ->  http://localhost:8000
-Frontend: cd frontend && npm install --legacy-peer-deps && npm run dev  ->  http://localhost:3000
+## Architecture
+- **Backend**: FastAPI (Python 3.11) on `:8000` — `backend/`
+- **Frontend**: Next.js 14 on `:3000` — `frontend/`
+- Frontend talks to backend via `NEXT_PUBLIC_API_URL`.
 
-## Bugs fixed
-1. frontend/package.json: eslint ^9.12.0 conflicted with eslint-config-next@14.2.5 (needs 7||8). Changed to ^8.57.0.
-2. Next.js 14.2.5 has a published CVE -- recommend: npm i next@^14.2.33 --legacy-peer-deps before production.
+## Quick start (local, Docker)
+```bash
+cp .env.example .env               # fill in API keys
+docker compose up --build
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:8000/docs
+```
 
-## Observations (not blockers)
-- main.py gracefully skips the full agent router if heavy deps (langgraph/chroma/...) are missing.
-- mitre_mapper silently returns T0000 Unknown when the RAG retriever can't load. Log the error in prod.
-- Backend CORS is allow_origins=["*"] -- tighten before going live.
+## Production hosting
 
-## Hosting
-- Backend: Dockerfile in backend/. Deploy to Fly.io/Railway/Render. Env from .env.example.
-- Frontend: Deploy to Vercel. Set NEXT_PUBLIC_API_URL to your backend URL.
+### Frontend → Vercel
+1. Import the GitHub repo, set **Root Directory** = `frontend/`.
+2. Env vars:
+   - `NEXT_PUBLIC_API_URL` = `https://<your-backend-host>`
+3. Install command is already set via `frontend/vercel.json` (`npm install --legacy-peer-deps`).
+
+### Backend → Railway / Render / Fly.io
+Uses `backend/Dockerfile`. Required env vars:
+| var | required | purpose |
+|---|---|---|
+| `OPENAI_API_KEY` or `GROQ_API_KEY` | yes (for real agents) | LLM calls |
+| `CORS_ORIGINS` | **yes in prod** | e.g. `https://cyber-sentinel.vercel.app` |
+| `FRONTEND_URL` | alt to `CORS_ORIGINS` | single origin shortcut |
+| `NVD_API_KEY`, `OTX_API_KEY`, `VIRUSTOTAL_API_KEY`, `SHODAN_API_KEY` | optional | threat-intel enrichment |
+| `LOG_LEVEL` | optional | default `INFO` |
+
+**Health check**: `GET /health` returns `{"status":"ok"}`. Configure the host to probe this endpoint.
+
+## Security checklist (production)
+- [x] CORS is env-driven (`CORS_ORIGINS`). Wildcard `*` is only used if explicitly set. `allow_credentials` is auto-disabled when `*`.
+- [x] Next.js bumped to `^14.2.33` (patches GHSA-9gr5-c3w2-mv9x SSRF).
+- [x] `agents/mitre_mapper.py` no longer swallows RAG errors silently.
+- [ ] Add an API key / auth layer before exposing agent endpoints publicly (not implemented — routes are open).
+- [ ] Rate-limit `/agents/*` endpoints.
+- [ ] Persist `chroma_db/` on a durable volume (`docker-compose.yml` already mounts one).
+
+## Known notes
+- Use `npm install --legacy-peer-deps` (`eslint@^8.57` + `eslint-config-next@14.2`).
+- Backend RAG deps (chromadb, sentence-transformers) are heavy; plan for ≥1 GB RAM. If they are not installed, the agent router falls back gracefully and `main.py` logs a warning.
