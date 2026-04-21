@@ -8,14 +8,23 @@ load_dotenv()
 app = FastAPI(title="Cyber Sentinel AI", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-from api.router import router
-app.include_router(router)
+from api.frontend_router import router as frontend_router
+app.include_router(frontend_router)
+
+try:
+    from api.router import router as agent_router
+    app.include_router(agent_router)
+except Exception as exc:  # pragma: no cover -- agent deps optional in dev
+    import logging
+    logging.getLogger("uvicorn.error").warning(
+        "Agent router disabled (install full requirements.txt): %s", exc
+    )
 
 @app.get("/")
 def root():
