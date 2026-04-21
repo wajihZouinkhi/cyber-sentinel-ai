@@ -1,28 +1,46 @@
-"use client";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+"use client"
+import { useEffect, useState } from "react"
+import { api, Threat } from "@/lib/api"
 
-const data = [
-  { name: "00:00", critical: 2, high: 5, medium: 12, low: 21 },
-  { name: "04:00", critical: 1, high: 4, medium: 9, low: 18 },
-  { name: "08:00", critical: 4, high: 9, medium: 17, low: 25 },
-  { name: "12:00", critical: 6, high: 14, medium: 22, low: 31 },
-  { name: "16:00", critical: 3, high: 11, medium: 19, low: 27 },
-  { name: "20:00", critical: 5, high: 8, medium: 15, low: 24 },
-];
+const ORDER = ["critical", "high", "medium", "low"] as const
+const COLOR = {
+  critical: "from-rose-500 to-rose-600",
+  high: "from-orange-400 to-rose-500",
+  medium: "from-amber-300 to-orange-400",
+  low: "from-emerald-400 to-primary",
+} as const
 
 export function SeverityChart() {
+  const [threats, setThreats] = useState<Threat[]>([])
+  useEffect(() => { api.threats(50).then(setThreats) }, [])
+  const counts = ORDER.map((s) => ({ s, n: threats.filter((t) => t.severity === s).length }))
+  const total = Math.max(1, threats.length)
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} stackOffset="sign">
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
-        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-        <Bar dataKey="critical" stackId="a" fill="#ff3864" />
-        <Bar dataKey="high" stackId="a" fill="#ffb400" />
-        <Bar dataKey="medium" stackId="a" fill="#00e5ff" />
-        <Bar dataKey="low" stackId="a" fill="#00ff9f" radius={[4, 4, 0, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+    <div className="space-y-4">
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-4xl font-bold tracking-tight">{threats.length}</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Total events</p>
+        </div>
+        <div className="flex h-16 items-end gap-1.5">
+          {counts.map(({ s, n }) => (
+            <div key={s} className={`w-3 rounded-t-md bg-gradient-to-t ${COLOR[s]}`} style={{ height: `${Math.max(6, (n / total) * 100)}%` }} />
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        {counts.map(({ s, n }) => (
+          <div key={s} className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="capitalize text-muted-foreground">{s}</span>
+              <span className="font-mono font-semibold">{n}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+              <div className={`h-full rounded-full bg-gradient-to-r ${COLOR[s]}`} style={{ width: `${(n / total) * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
